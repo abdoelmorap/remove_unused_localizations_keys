@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'package:universal_io/io.dart';
+import 'dart:io';
 import 'package:yaml/yaml.dart';
 
 /// Scans the project for unused localization keys and removes them from `.arb` files.

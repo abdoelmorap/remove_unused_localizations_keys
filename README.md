@@ -1,6 +1,6 @@
 # remove_unused_localizations_keys
 
-A Flutter development tool that automatically detects and removes unused localization keys from
+A Dart CLI tool that automatically detects and removes unused localization keys from
 `.arb` files, keeping your project clean and optimized.
 
 ## Features
