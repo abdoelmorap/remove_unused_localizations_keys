@@ -28,12 +28,11 @@ void runLocalizationCleaner({bool keepUnused = false}) {
     excludedFiles = {'$outputDir/$outputFile'};
   }
 
-  final List<File> localizationFiles =
-      localizationDir
-          .listSync()
-          .whereType<File>()
-          .where((file) => file.path.endsWith('.arb'))
-          .toList();
+  final List<File> localizationFiles = localizationDir
+      .listSync()
+      .whereType<File>()
+      .where((file) => file.path.endsWith('.arb'))
+      .toList();
 
   if (localizationFiles.isEmpty) {
     log('No .arb files found in ${localizationDir.path}');
