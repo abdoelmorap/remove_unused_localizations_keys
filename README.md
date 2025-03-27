@@ -73,7 +73,7 @@ Updated lib/l10n/app_ar.arb, removed unused keys.
 ## Contributing
 
 Contributions are welcome! Please open an issue or submit a pull request
-on [GitHub](https://github.com/OsamaAssaf/remove_unused_localizations).
+on [GitHub](https://github.com/abdoelmorap/remove_unused_localizations_keys).
 
 ## License
 
