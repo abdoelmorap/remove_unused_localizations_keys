@@ -57,21 +57,15 @@ void runLocalizationCleaner({bool keepUnused = false}) {
 
   final String keysPattern = allKeys.map(RegExp.escape).join('|');
   final RegExp regex = RegExp(
-    // ignore: prefer_interpolation_to_compose_strings
-    r'(?:' // Start non-capturing group for different access patterns
-            r'(?:[a-zA-Z0-9_]+\.)+' // Matches `_appLocalizations.`, `cubit.appLocalizations.`
-            r'|'
-            r'[a-zA-Z0-9_]+\.of\(\s*(?:context|AppNavigation\.context|this\.context|widget\.context|super\.context|_context|BuildContext\s+\w+)\s*\)\!?\.?\s*' // Matches `SomeLocalization.of(context)!.some_key`
-            r'|'
-            r'[a-zA-Z0-9_]+\.\w+\(\s*\)(?:\.\w+\(\)\s*)*\.?\s*' // Handles `SomeClass.method().key` and chained calls
-            r'|'
-            r'[a-zA-Z0-9_]+\.getLocalization\(\)(?:\.\w+\(\))?\.?' // Handles `SomeClass.getLocalization().some_key`
-            r'|'
-            r'\$\{(?:[a-zA-Z0-9_]+\.)*[a-zA-Z0-9_]+\.of\(\s*(?:context|AppNavigation\.context|this\.context|widget\.context|super\.context|_context|BuildContext\s+\w+)\s*\)\!?\.?\s*' // Handles `${SomeLocalization.of(context)!.some_key}`
-            r')'
-            r'(' +
-        keysPattern +
-        r')\b', // Captures the localization key
+
+    r'(?:' // Start non-capturing group for all possible access patterns
+    r'(?:[a-zA-Z0-9_]+\.)+' // e.g., `_appLocalizations.` or `cubit.appLocalizations.`
+    r'|'
+    r'[a-zA-Z0-9_]+\.of\(\s*(?:context|AppNavigation\.context|this\.context|BuildContext\s+\w+)\s*\)\!?\s*\.\s*' // `of(context)!.key` with optional whitespace
+    r'|'
+    r'[a-zA-Z0-9_]+\.\w+\(\s*\)\s*\.\s*' // `SomeClass.method().key`
+    r')'
+    r'(' + keysPattern + r')\b', // The actual key, // Captures the localization key
     multiLine: true,
     dotAll: true, // Makes `.` match newlines (crucial for multi-line cases)
   );
