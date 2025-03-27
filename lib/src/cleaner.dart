@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
+import 'package:universal_io/io.dart';
 import 'package:yaml/yaml.dart';
 
 /// Scans the project for unused localization keys and removes them from `.arb` files.
@@ -10,7 +10,9 @@ void runLocalizationCleaner({bool keepUnused = false}) {
   Directory localizationDir = Directory('lib/l10n');
   Set<String> excludedFiles = {'lib/l10n/app_localizations.dart'};
   if (!yamlFile.existsSync()) {
-    print('Error: l10n.yaml file not found! App will use defualts of loc dir $localizationDir');
+
+      log('Error: l10n.yaml file not found! App will use defualts of loc dir $localizationDir');
+
   } else {
       // Read & parse YAML
   final String yamlContent = yamlFile.readAsStringSync();
