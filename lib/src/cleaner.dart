@@ -10,21 +10,22 @@ void runLocalizationCleaner({bool keepUnused = false}) {
   Directory localizationDir = Directory('lib/l10n');
   Set<String> excludedFiles = {'lib/l10n/app_localizations.dart'};
   if (!yamlFile.existsSync()) {
-
-      log('Error: l10n.yaml file not found! App will use defualts of loc dir $localizationDir');
-
+    log(
+      'Error: l10n.yaml file not found! App will use defualts of loc dir $localizationDir',
+    );
   } else {
-      // Read & parse YAML
-  final String yamlContent = yamlFile.readAsStringSync();
-  final Map yamlData = loadYaml(yamlContent);
+    // Read & parse YAML
+    final String yamlContent = yamlFile.readAsStringSync();
+    final Map yamlData = loadYaml(yamlContent);
 
-  // Extract values dynamically
-  final String arbDir = yamlData['arb-dir'] as String;
-  final String outputDir = yamlData['output-dir']??"";
-  final String outputFile = yamlData['output-localization-file'] ??excludedFiles;
-  // Construct values
- localizationDir = Directory(arbDir);
- excludedFiles = {'$outputDir/$outputFile'};
+    // Extract values dynamically
+    final String arbDir = yamlData['arb-dir'] as String;
+    final String outputDir = yamlData['output-dir'] ?? "";
+    final String outputFile =
+        yamlData['output-localization-file'] ?? excludedFiles;
+    // Construct values
+    localizationDir = Directory(arbDir);
+    excludedFiles = {'$outputDir/$outputFile'};
   }
 
   final List<File> localizationFiles =
