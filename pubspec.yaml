@@ -1,6 +1,6 @@
 name: remove_unused_localizations_keys
 description: "A Flutter package to clean unused localization keys from .arb files."
-version: 0.0.5
+version: 0.0.13
 homepage: https://github.com/abdoelmorap/remove_unused_localizations_keys
 repository: https://github.com/abdoelmorap/remove_unused_localizations_keys
 issue_tracker: https://github.com/abdoelmorap/remove_unused_localizations_keys/issues
@@ -10,7 +10,6 @@ environment:
 
 executables:
   remove_unused_localizations_keys: remove_unused_localizations_keys
-
 
 
 dependencies:

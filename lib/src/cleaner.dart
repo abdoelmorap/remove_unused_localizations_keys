@@ -57,15 +57,16 @@ void runLocalizationCleaner({bool keepUnused = false}) {
 
   final String keysPattern = allKeys.map(RegExp.escape).join('|');
   final RegExp regex = RegExp(
-
     r'(?:' // Start non-capturing group for all possible access patterns
-    r'(?:[a-zA-Z0-9_]+\.)+' // e.g., `_appLocalizations.` or `cubit.appLocalizations.`
-    r'|'
-    r'[a-zA-Z0-9_]+\.of\(\s*(?:context|AppNavigation\.context|this\.context|BuildContext\s+\w+)\s*\)\!?\s*\.\s*' // `of(context)!.key` with optional whitespace
-    r'|'
-    r'[a-zA-Z0-9_]+\.\w+\(\s*\)\s*\.\s*' // `SomeClass.method().key`
-    r')'
-    r'(' + keysPattern + r')\b', // The actual key, // Captures the localization key
+            r'(?:[a-zA-Z0-9_]+\.)+' // e.g., `_appLocalizations.` or `cubit.appLocalizations.`
+            r'|'
+            r'[a-zA-Z0-9_]+\.of\(\s*(?:context|AppNavigation\.context|this\.context|BuildContext\s+\w+)\s*\)\!?\s*\.\s*' // `of(context)!.key` with optional whitespace
+            r'|'
+            r'[a-zA-Z0-9_]+\.\w+\(\s*\)\s*\.\s*' // `SomeClass.method().key`
+            r')'
+            r'(' +
+        keysPattern +
+        r')\b', // The actual key, // Captures the localization key
     multiLine: true,
     dotAll: true, // Makes `.` match newlines (crucial for multi-line cases)
   );
