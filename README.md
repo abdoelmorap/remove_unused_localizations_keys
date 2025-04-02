@@ -16,14 +16,35 @@
 ---
 
 ## 📦 Installation
+# 🗑️ Remove Unused Localization Keys
 
+[![Pub Version](https://img.shields.io/pub/v/remove_unused_localizations_keys)](https://pub.dev/packages/remove_unused_localizations_keys)
+
+
+**A powerful Flutter package to identify and remove unused localization keys from your project, ensuring cleaner and more efficient `.arb` files.**
+
+---
+
+## 🚀 Features
+✅ Scans your localization files and detects unused keys.
+✅ Provides an interactive option to remove them automatically.
+✅ Supports multiple language files.
+✅ Keeps your project lightweight and optimized.
+
+---
+
+## 📦 Installation
+
+Add the package to `dev_dependencies` in `pubspec.yaml`:
 Add the package to `dev_dependencies` in `pubspec.yaml`:
 
 ```yaml
 dev_dependencies:
   remove_unused_localizations_keys: latest
+  remove_unused_localizations_keys: latest
 ```
 
+Then, fetch dependencies:
 Then, fetch dependencies:
 
 ```sh
@@ -31,9 +52,12 @@ flutter pub get
 ```
 
 ---
+---
 
 ## 🔧 Usage
+## 🔧 Usage
 
+Run the following command to analyze your project:
 Run the following command to analyze your project:
 
 ```sh
@@ -41,17 +65,26 @@ dart run remove_unused_localizations_keys
 ```
 
 ### 🛠 Advanced Options
+### 🛠 Advanced Options
 
+| Option | Description |
+|--------|-------------|
+| `--keep-unused` | Simulates the process without deleting any keys. |
+| `--` | Runs without requiring user confirmation. |
 | Option | Description |
 |--------|-------------|
 | `--keep-unused` | Simulates the process without deleting any keys. |
 | `--` | Runs without requiring user confirmation. |
 
 Example:
+Example:
 ```sh
 dart run remove_unused_localizations_keys --keep-unused
 ```
 
+---
+
+## 💡 Example Output
 ---
 
 ## 💡 Example Output
