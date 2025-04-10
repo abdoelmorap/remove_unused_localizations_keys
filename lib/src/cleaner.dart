@@ -1,177 +1,160 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:yaml/yaml.dart';
 
-void main() {
-  runLocalizationCleaner(
-    dryRun: true, // يعرض المفاتيح غير المستخدمة دون حذفها
-    keepUnused: false,
-  );
-}
-
-/// تنظيف مفاتيح الترجمة غير المستخدمة
+/// Scans the project for unused localization keys and removes them from `.arb` files.
+/// If [keepUnused] is true, unused keys will be saved to a file instead of being removed.
+/// If [useEasyLocalization] is true, only easy_localization patterns will be searched for.
+/// If [easyLocalizationPath] is provided, it will be used as the path for easy_localization files.
 void runLocalizationCleaner({
-  bool dryRun = false,
   bool keepUnused = false,
+  bool useEasyLocalization = false,
+  String? easyLocalizationPath,
 }) {
-  // 1. قراءة الإعدادات من l10n.yaml
-  final config = _loadConfig();
+  final File yamlFile = File('l10n.yaml'); // Path to your l10n.yaml file
 
-  // 2. استخراج جميع المفاتيح من ملفات .arb
-  final (allKeys, fileKeyMap) = _extractAllKeys(config);
-
-  if (allKeys.isEmpty) {
-    print('❌ No localization keys found in ${config.localizationDir.path}');
-    return;
-  }
-
-  // 3. البحث عن المفاتيح المستخدمة في الكود
-  final usedKeys = _findUsedKeys(allKeys, config);
-
-  // 4. تحديد المفاتيح غير المستخدمة
-  final unusedKeys = allKeys.difference(usedKeys);
-  if (unusedKeys.isEmpty) {
-    print('✅ No unused keys found.');
-    return;
-  }
-
-  // 5. معالجة المفاتيح غير المستخدمة
-  _handleUnusedKeys(
-    unusedKeys: unusedKeys,
-    fileKeyMap: fileKeyMap,
-    dryRun: dryRun,
-    keepUnused: keepUnused,
-  );
-}
-
-class Config {
-  final Directory localizationDir;
-  final Set<String> excludedFiles;
-
-  Config(this.localizationDir, this.excludedFiles);
-}
-
-/// 1. تحميل الإعدادات من l10n.yaml
-Config _loadConfig() {
-  const defaultDir = 'lib/l10n';
-  const defaultExcluded = {'lib/l10n/app_localizations.dart'};
-
-  final yamlFile = File('l10n.yaml');
+  Directory localizationDir = Directory('lib/l10n');
+  Set<String> excludedFiles = {'lib/l10n/app_localizations.dart'};
   if (!yamlFile.existsSync()) {
-    print('⚠️ l10n.yaml not found. Using default directory: $defaultDir');
-    return Config(Directory(defaultDir), defaultExcluded);
-  }
-
-  try {
-    final yamlData = loadYaml(yamlFile.readAsStringSync()) as Map;
-    final arbDir = yamlData['arb-dir'] as String? ?? defaultDir;
-    final outputDir = yamlData['output-dir'] as String? ?? '';
-    final outputFile = yamlData['output-localization-file'] as String? ?? '';
-
-    return Config(
-      Directory(arbDir),
-      {'$outputDir/$outputFile'},
+    log(
+      'Error: l10n.yaml file not found! App will use defualts of loc dir $localizationDir',
     );
-  } catch (e) {
-    print('❌ Error parsing l10n.yaml: $e');
-    return Config(Directory(defaultDir), defaultExcluded);
+  } else {
+    // Read & parse YAML
+    final String yamlContent = yamlFile.readAsStringSync();
+    final Map yamlData = loadYaml(yamlContent);
+
+    // Extract values dynamically
+    final String arbDir = yamlData['arb-dir'] as String;
+    final String outputDir = yamlData['output-dir'] ?? "";
+    final String outputFile =
+        yamlData['output-localization-file'] ?? excludedFiles;
+    // Construct values
+    localizationDir = Directory(arbDir);
+    excludedFiles = {'$outputDir/$outputFile'};
   }
-}
 
-/// 2. استخراج جميع المفاتيح من ملفات ARB
-(Set<String>, Map<File, Set<String>>) _extractAllKeys(Config config) {
-  final allKeys = <String>{};
-  final fileKeyMap = <File, Set<String>>{};
+  // For easy_localization, look for JSON files in the specified path or default to assets/translations
+  if (useEasyLocalization) {
+    localizationDir = Directory(easyLocalizationPath ?? 'assets/translations');
+    if (!localizationDir.existsSync()) {
+      log('Error: ${localizationDir.path} directory not found for easy_localization!');
+      return;
+    }
+  }
 
-  final arbFiles = config.localizationDir
+  final List<File> localizationFiles = localizationDir
       .listSync()
       .whereType<File>()
-      .where((f) => f.path.endsWith('.arb'))
+      .where((file) => useEasyLocalization 
+          ? file.path.endsWith('.json')
+          : file.path.endsWith('.arb'))
       .toList();
 
-  for (final file in arbFiles) {
-    try {
-      final data = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
-      final keys = data.keys.where((k) => !k.startsWith('@')).toSet();
-      allKeys.addAll(keys);
-      fileKeyMap[file] = keys;
-    } catch (e) {
-      print('❌ Error reading ${file.path}: $e');
-    }
-  }
-
-  return (allKeys, fileKeyMap);
-}
-
-/// 3. البحث عن المفاتيح المستخدمة في الكود
-Set<String> _findUsedKeys(Set<String> allKeys, Config config) {
-  final usedKeys = <String>{};
-  final libDir = Directory('lib');
-  final keysPattern = allKeys.map(RegExp.escape).join('|');
-
-  final regex = RegExp(
-    r'(?:[\w.]+\.of\(.*?\)\.|[\w.]+\.)(' + keysPattern + r')\b',
-    multiLine: true,
-  );
-
-  for (final entity in libDir.listSync(recursive: true)) {
-    if (entity is! File ||
-        !entity.path.endsWith('.dart') ||
-        config.excludedFiles.contains(entity.path)) {
-      continue;
-    }
-
-    final content = entity.readAsStringSync();
-    if (!content.contains(RegExp(keysPattern))) continue;
-
-    for (final match in regex.allMatches(content)) {
-      usedKeys.add(match.group(1)!);
-    }
-  }
-
-  return usedKeys;
-}
-
-/// 4. معالجة المفاتيح غير المستخدمة
-void _handleUnusedKeys({
-  required Set<String> unusedKeys,
-  required Map<File, Set<String>> fileKeyMap,
-  required bool dryRun,
-  required bool keepUnused,
-}) {
-  print('🔍 Found ${unusedKeys.length} unused keys:');
-  print(unusedKeys.join('\n'));
-
-  if (dryRun) {
-    print('🚀 Dry run completed (no changes made)');
+  if (localizationFiles.isEmpty) {
+    log('No ${useEasyLocalization ? ".json" : ".arb"} files found in ${localizationDir.path}');
     return;
   }
 
-  if (keepUnused) {
-    File('unused_keys.txt').writeAsStringSync(unusedKeys.join('\n'));
-    print('📄 Saved unused keys to unused_keys.txt');
-    return;
+  final Set<String> allKeys = <String>{};
+  final Map<File, Set<String>> fileKeyMap = <File, Set<String>>{};
+
+  // Read all keys from localization files
+  for (final File file in localizationFiles) {
+    final Map<String, dynamic> data =
+        json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+    final Set<String> keys = useEasyLocalization
+        ? data.keys.toSet() // For JSON files, all keys are valid
+        : data.keys.where((key) => !key.startsWith('@')).toSet(); // For ARB files, exclude metadata
+    allKeys.addAll(keys);
+    fileKeyMap[file] = keys;
   }
 
-  // حذف المفاتيح غير المستخدمة
-  for (final entry in fileKeyMap.entries) {
-    final file = entry.key;
-    final data = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
-    bool updated = false;
+  final Set<String> usedKeys = <String>{};
+  final Directory libDir = Directory('lib');
 
-    for (final key in unusedKeys) {
-      if (data.containsKey(key)) {
-        data.remove(key);
-        data.remove('@$key');
-        updated = true;
+  final String keysPattern = allKeys.map(RegExp.escape).join('|');
+  
+  // Create appropriate regex based on mode
+  final RegExp regex = useEasyLocalization
+      ? RegExp('(?:context|this)\\.tr\\([\'"]($keysPattern)[\'"]\\)|tr\\([\'"]($keysPattern)[\'"]\\)',
+          multiLine: true, dotAll: true)
+      : RegExp(
+          r'(?:' // Start non-capturing group for all possible access patterns
+                  r'(?:[a-zA-Z0-9_]+\.)+' // e.g., `_appLocalizations.` or `cubit.appLocalizations.`
+                  r'|'
+                  r'[a-zA-Z0-9_]+\.of\(\s*(?:context|AppNavigation\.context|this\.context|BuildContext\s+\w+)\s*\)\!?\s*\.\s*' // `of(context)!.key` with optional whitespace
+                  r'|'
+                  r'[a-zA-Z0-9_]+\.\w+\(\s*\)\s*\.\s*' // `SomeClass.method().key`
+                  r')'
+                  r'(' + keysPattern + r')\b', // The actual key
+          multiLine: true,
+          dotAll: true,
+        );
+
+  for (final FileSystemEntity file in libDir.listSync(recursive: true)) {
+    if (file is File &&
+        file.path.endsWith('.dart') &&
+        !excludedFiles.contains(file.path)) {
+      final String content = file.readAsStringSync();
+
+      // Quick pre-check: Skip files that don't contain any key substring
+      if (!content.contains(RegExp(keysPattern))) continue;
+
+      for (final Match match in regex.allMatches(content)) {
+        if (useEasyLocalization) {
+          final String? key = match.group(1) ?? match.group(2);
+          if (key != null && allKeys.contains(key)) {
+            usedKeys.add(key);
+          }
+        } else {
+          usedKeys.add(match.group(1)!);
+        }
       }
     }
-
-    if (updated) {
-      file.writeAsStringSync(const JsonEncoder.withIndent('  ').convert(data));
-      print('✂️ Removed keys from ${file.path}');
-    }
   }
 
-  print('✅ Successfully removed unused keys');
+  // Determine unused keys
+  final Set<String> unusedKeys = allKeys.difference(usedKeys);
+  if (unusedKeys.isEmpty) {
+    log('No unused localization keys found.');
+    return;
+  }
+
+  log("Unused keys found: ${unusedKeys.join(', ')}");
+
+  if (keepUnused) {
+    // Keep unused keys to a file instead of deleting them
+    final File unusedKeysFile = File('unused_localization_keys.txt');
+    unusedKeysFile.writeAsStringSync(unusedKeys.join('\n'));
+    log('✅ Unused keys saved to ${unusedKeysFile.path}');
+  } else {
+    // Remove unused keys from all localization files
+    for (final MapEntry<File, Set<String>> entry in fileKeyMap.entries) {
+      final File file = entry.key;
+      final Set<String> keys = entry.value;
+      final Map<String, dynamic> data =
+          json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+
+      bool updated = false;
+      for (final key in keys) {
+        if (unusedKeys.contains(key)) {
+          data.remove(key);
+          if (!useEasyLocalization) {
+            data.remove('@$key'); // Only remove metadata for ARB files
+          }
+          updated = true;
+        }
+      }
+
+      if (updated) {
+        file.writeAsStringSync(
+          const JsonEncoder.withIndent('  ').convert(data),
+        );
+        log('Updated ${file.path}, removed unused keys.');
+      }
+    }
+    log('✅ Unused keys successfully removed.');
+  }
 }

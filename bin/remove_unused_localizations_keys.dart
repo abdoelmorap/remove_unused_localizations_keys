@@ -4,19 +4,30 @@ import 'package:remove_unused_localizations_keys/remove_unused_localizations_key
 
 void main(List<String> arguments) {
   bool keepUnused = arguments.contains('--keep-unused');
-  bool dryRun = arguments.contains('--dry-run');
-  LocalizationSystem system = LocalizationSystem.arb;
-
-  if (arguments.contains('--getx')) {
-    system = LocalizationSystem.getx;
-  } else if (arguments.contains('--easyloc')) {
-    system = LocalizationSystem.easyLoc;
+  bool useEasyLocalization = arguments.contains('--easy-loc');
+  
+  String? customPath;
+  for (int i = 0; i < arguments.length; i++) {
+    if (arguments[i].startsWith('path=')) {
+      customPath = arguments[i].substring(5); // Remove 'path=' prefix
+      break;
+    }
   }
 
-  print('Running Localization Cleaner...');
-  runLocalizationCleaner(keepUnused: keepUnused, system: system, dryRun: dryRun);
+  log('Running Localization Cleaner...');
+  if (useEasyLocalization) {
+    log('Using easy_localization mode');
+    if (customPath != null) {
+      log('Using custom translations path: $customPath');
+    }
+  }
+  runLocalizationCleaner(
+    keepUnused: keepUnused,
+    useEasyLocalization: useEasyLocalization,
+    easyLocalizationPath: customPath,
+  );
   if (keepUnused) {
-    print('✅ Unused keys saved to unused_localization_keys.txt');
+    log('✅ Unused keys saved to unused_localization_keys.txt');
   }
-  print('Done.');
+  log('Done.');
 }
