@@ -3,7 +3,9 @@
 [![Pub Version](https://img.shields.io/pub/v/remove_unused_localizations_keys)](https://pub.dev/packages/remove_unused_localizations_keys)
 
 
-**A powerful Flutter package to identify and remove unused localization keys from your project, ensuring cleaner and more efficient `.arb` files.**
+[![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-grey?logo=buymeacoffee&logoColor=yellow)](https://ko-fi.com/abdelrhmantolba)
+
+**A powerful Flutter package to identify and remove unused localization keys from your project, ensuring cleaner and more efficient localization files.**
 
 ---
 
@@ -12,6 +14,8 @@
 ✅ Provides an interactive option to remove them automatically.
 ✅ Supports multiple language files.
 ✅ Keeps your project lightweight and optimized.
+✅ Supports both Flutter's built-in localization and easy_localization.
+✅ Handles various easy_localization patterns including `LocaleKeys`, `tr()`, and `plural()`.
 
 ---
 
@@ -34,10 +38,24 @@ flutter pub get
 
 ## 🔧 Usage
 
+### For Flutter's Built-in Localization
 Run the following command to analyze your project:
 
 ```sh
 dart run remove_unused_localizations_keys
+```
+
+### For Easy Localization
+Run with the `--easy-loc` flag:
+
+```sh
+dart run remove_unused_localizations_keys --easy-loc
+```
+
+You can also specify a custom path for your translation files:
+
+```sh
+dart run remove_unused_localizations_keys --easy-loc path=assets/i18n
 ```
 
 ### 🛠 Advanced Options
@@ -45,11 +63,17 @@ dart run remove_unused_localizations_keys
 | Option | Description |
 |--------|-------------|
 | `--keep-unused` | Simulates the process without deleting any keys. |
+| `--easy-loc` | Enables easy_localization mode. |
+| `path=` | Specifies custom path for translation files (works with `--easy-loc`). |
 | `--` | Runs without requiring user confirmation. |
 
-Example:
+Examples:
 ```sh
-dart run remove_unused_localizations_keys --keep-unused
+# Keep unused keys in easy_localization mode
+dart run remove_unused_localizations_keys --easy-loc --keep-unused
+
+# Use custom path for translations
+dart run remove_unused_localizations_keys --easy-loc path=assets/i18n
 ```
 
 ---
@@ -80,13 +104,11 @@ We tested against three real-world Flutter projects with known unused keys:
 
 ---
 
-
-
 ## 🎯 Roadmap
 🚀 **Upcoming Features:**
-- [ ] Support for `easy_localization`
 - [ ] Seamless CI/CD integration
 - [ ] Auto-fix feature to replace similar keys
+- [ ] Support for more localization packages
 
 ---
 

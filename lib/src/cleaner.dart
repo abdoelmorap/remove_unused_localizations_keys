@@ -47,7 +47,7 @@ void runLocalizationCleaner({
   final List<File> localizationFiles = localizationDir
       .listSync()
       .whereType<File>()
-      .where((file) => useEasyLocalization 
+      .where((file) => useEasyLocalization
           ? file.path.endsWith('.json')
           : file.path.endsWith('.arb'))
       .toList();
@@ -66,7 +66,9 @@ void runLocalizationCleaner({
         json.decode(file.readAsStringSync()) as Map<String, dynamic>;
     final Set<String> keys = useEasyLocalization
         ? data.keys.toSet() // For JSON files, all keys are valid
-        : data.keys.where((key) => !key.startsWith('@')).toSet(); // For ARB files, exclude metadata
+        : data.keys
+            .where((key) => !key.startsWith('@'))
+            .toSet(); // For ARB files, exclude metadata
     allKeys.addAll(keys);
     fileKeyMap[file] = keys;
   }
@@ -75,11 +77,17 @@ void runLocalizationCleaner({
   final Directory libDir = Directory('lib');
 
   final String keysPattern = allKeys.map(RegExp.escape).join('|');
-  
+
   // Create appropriate regex based on mode
   final RegExp regex = useEasyLocalization
-      ? RegExp('(?:context|this)\\.tr\\([\'"]($keysPattern)[\'"]\\)|tr\\([\'"]($keysPattern)[\'"]\\)',
-          multiLine: true, dotAll: true)
+      ? RegExp(
+          // Match easy_localization patterns
+          'LocaleKeys\\.($keysPattern)(?:\\.tr\\([^)]*\\)|\\.plural\\([^)]*\\))?|' // LocaleKeys.key with optional .tr() or .plural()
+          '(?:context|this)\\.tr\\([\'"]($keysPattern)[\'"]\\)|' // context.tr('key')
+          'tr\\([\'"]($keysPattern)[\'"]\\)|' // tr('key')
+          '[\'"]($keysPattern)[\'"]\\.tr\\([^)]*\\)', // "key".tr() or 'key'.tr()
+          multiLine: true,
+          dotAll: true)
       : RegExp(
           r'(?:' // Start non-capturing group for all possible access patterns
                   r'(?:[a-zA-Z0-9_]+\.)+' // e.g., `_appLocalizations.` or `cubit.appLocalizations.`
@@ -88,7 +96,9 @@ void runLocalizationCleaner({
                   r'|'
                   r'[a-zA-Z0-9_]+\.\w+\(\s*\)\s*\.\s*' // `SomeClass.method().key`
                   r')'
-                  r'(' + keysPattern + r')\b', // The actual key
+                  r'(' +
+              keysPattern +
+              r')\b', // The actual key
           multiLine: true,
           dotAll: true,
         );
@@ -104,7 +114,11 @@ void runLocalizationCleaner({
 
       for (final Match match in regex.allMatches(content)) {
         if (useEasyLocalization) {
-          final String? key = match.group(1) ?? match.group(2);
+          // For easy_localization, check all capture groups
+          final String? key = match.group(1) ??
+              match.group(2) ??
+              match.group(3) ??
+              match.group(4);
           if (key != null && allKeys.contains(key)) {
             usedKeys.add(key);
           }

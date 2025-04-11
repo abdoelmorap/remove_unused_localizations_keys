@@ -5,7 +5,7 @@ import 'package:remove_unused_localizations_keys/remove_unused_localizations_key
 void main(List<String> arguments) {
   bool keepUnused = arguments.contains('--keep-unused');
   bool useEasyLocalization = arguments.contains('--easy-loc');
-  
+
   String? customPath;
   for (int i = 0; i < arguments.length; i++) {
     if (arguments[i].startsWith('path=')) {
