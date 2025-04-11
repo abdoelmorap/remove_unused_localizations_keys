@@ -2,7 +2,21 @@
 
 [![Pub Version](https://img.shields.io/pub/v/remove_unused_localizations_keys)](https://pub.dev/packages/remove_unused_localizations_keys)
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/X8X81DBBZ0)
-
+[![likes](https://badges.bar/easy_localization/likes)](https://pub.dev/packages/easy_localization/score)
+[![likes](https://badges.bar/easy_localization/popularity)](https://pub.dev/packages/easy_localization/score)
+[![likes](https://badges.bar/easy_localization/pub%20points)](https://pub.dev/packages/easy_localization/score)
+![Code Climate issues](https://img.shields.io/github/issues/aissat/remove_unused_localizations_keys?style=flat-square)
+![GitHub closed issues](https://img.shields.io/github/issues-closed/aissat/remove_unused_localizations_keys?style=flat-square)
+![GitHub contributors](https://img.shields.io/github/contributors/aissat/remove_unused_localizations_keys?style=flat-square)
+![GitHub repo size](https://img.shields.io/github/repo-size/aissat/remove_unused_localizations_keys?style=flat-square)
+![GitHub forks](https://img.shields.io/github/forks/aissat/remove_unused_localizations_keys?style=flat-square)
+![GitHub stars](https://img.shields.io/github/stars/aissat/remove_unused_localizations_keys?style=flat-square)
+![Coveralls github branch](https://img.shields.io/coveralls/github/aissat/remove_unused_localizations_keys/dev?style=flat-square)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/aissat/remove_unused_localizations_keys/FlutterTester?longCache=true&style=flat-square&logo=github)
+![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/aissat/remove_unused_localizations_keys?style=flat-square)
+![GitHub license](https://img.shields.io/github/license/aissat/remove_unused_localizations_keys?style=flat-square)
+![Sponsors](https://img.shields.io/opencollective/all/remove_unused_localizations_keys?style=flat-square)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
 
 
 **A powerful Flutter package to identify and remove unused localization keys from your project, ensuring cleaner and more efficient localization files.**
