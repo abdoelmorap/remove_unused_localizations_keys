@@ -1,9 +1,9 @@
 # 🗑️ Remove Unused Localization Keys
 
 [![Pub Version](https://img.shields.io/pub/v/remove_unused_localizations_keys)](https://pub.dev/packages/remove_unused_localizations_keys)
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/X8X81DBBZ0)
 
 
-[![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-grey?logo=buymeacoffee&logoColor=yellow)](https://ko-fi.com/abdelrhmantolba)
 
 **A powerful Flutter package to identify and remove unused localization keys from your project, ensuring cleaner and more efficient localization files.**
 
